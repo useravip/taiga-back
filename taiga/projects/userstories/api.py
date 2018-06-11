@@ -62,8 +62,10 @@ class UserStoryViewSet(OCCResourceMixin, VotedResourceMixin, HistoryResourceMixi
     permission_classes = (permissions.UserStoryPermission,)
     filter_backends = (base_filters.CanViewUsFilterBackend,
                        filters.EpicFilter,
+                       base_filters.RoleFilter,
                        base_filters.OwnersFilter,
                        base_filters.AssignedToFilter,
+                       base_filters.AssignedUsersFilter,
                        base_filters.StatusesFilter,
                        base_filters.TagsFilter,
                        base_filters.WatchersFilter,
@@ -126,7 +128,6 @@ class UserStoryViewSet(OCCResourceMixin, VotedResourceMixin, HistoryResourceMixi
                                include_attachments=include_attachments,
                                include_tasks=include_tasks,
                                epic_id=epic_id)
-
         return qs
 
     def pre_conditions_on_save(self, obj):
@@ -306,6 +307,7 @@ class UserStoryViewSet(OCCResourceMixin, VotedResourceMixin, HistoryResourceMixi
         assigned_to_filter_backends = (f for f in filter_backends if f != base_filters.AssignedToFilter)
         owners_filter_backends = (f for f in filter_backends if f != base_filters.OwnersFilter)
         epics_filter_backends = (f for f in filter_backends if f != filters.EpicFilter)
+        roles_filter_backends = (f for f in filter_backends if f != base_filters.RoleFilter)
 
         queryset = self.get_queryset()
         querysets = {
@@ -313,7 +315,8 @@ class UserStoryViewSet(OCCResourceMixin, VotedResourceMixin, HistoryResourceMixi
             "assigned_to": self.filter_queryset(queryset, filter_backends=assigned_to_filter_backends),
             "owners": self.filter_queryset(queryset, filter_backends=owners_filter_backends),
             "tags": self.filter_queryset(queryset),
-            "epics": self.filter_queryset(queryset, filter_backends=epics_filter_backends)
+            "epics": self.filter_queryset(queryset, filter_backends=epics_filter_backends),
+            "roles": self.filter_queryset(queryset, filter_backends=roles_filter_backends)
         }
         return response.Ok(services.get_userstories_filters_data(project, querysets))
 

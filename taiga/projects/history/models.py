@@ -176,6 +176,18 @@ class HistoryEntry(models.Model):
                 (key, value) = resolve_diff_value(key)
             elif key in users_keys:
                 value = [resolve_value("users", x) for x in self.diff[key]]
+            elif key == "assigned_users":
+                diff_in, diff_out = self.diff[key]
+                value_in = None
+                value_out = None
+
+                if diff_in:
+                    users_list = [resolve_value("users", x) for x in diff_in if x]
+                    value_in = ", ".join(filter(None, users_list))
+                if diff_out:
+                    users_list = [resolve_value("users", x) for x in diff_out if x]
+                    value_out = ", ".join(filter(None, users_list))
+                value = [value_in, value_out]
             elif key == "points":
                 points = {}
 
